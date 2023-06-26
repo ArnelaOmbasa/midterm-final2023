@@ -25,6 +25,20 @@ Flight::route('POST /midterm/investor', function(){
     * This endpoint should return output in JSON format
     * Sample output is given in figure 2 (message should be updated according to the result)
     */
+    $request = Flight::request()->data->getData();
+    $id = $request['id'];
+   $share_class_id = $request['share_class_id'];
+    $share_category_id = $request['share_category_id'];
+    $investor_id = $request['investor_id'];
+    $diluted_shares = $request['diluted_shares'];
+    $first_name=$request['first_name'];
+    $last_name=$request['last_name'];
+    $email=$request['email'];
+    $company=$request['company'];
+
+
+
+    return Flight::json(Flight::midtermService()->investor($id, $share_class_id, $share_category_id, $investor_id, $diluted_shares,$first_name,$last_name,$email,$company));
 });
 
 
@@ -39,6 +53,7 @@ Flight::route('GET /midterm/investor_email/@email', function($email){
     * Output example is given in figure 2 (message should be updated according to the result)
     * This endpoint should return output in JSON format
     */
+    Flight::json(Flight::midtermService()->investor_email());
 });
 
 Flight::route("GET /midterm/investor/@share_class_id", function($share_class_id){
@@ -50,7 +65,10 @@ Flight::route("GET /midterm/investor/@share_class_id", function($share_class_id)
     * Sample data within tables and expected output with given data is provided in figures 3, 4, 5 and 6
     * Output is given in figure 6
     * This endpoint should return output in JSON format
+   
     */
+    Flight::json(Flight::midtermService()->investors($share_class_id));
+
 });
 
 ?>

@@ -7,9 +7,10 @@ Flight::route('GET /final/connection-check', function(){
     * Goal is to check whether connection is successfully established or not
     * This endpoint does not have to return output in JSON format
     */
+    Flight::midtermService();
 });
 
-Flight::route('GET /final/login', function(){
+Flight::route('POST /final/login', function(){
     /** TODO
     * This endpoint is used to login user to system
     * you can use email: demo.user@gmail.com and password: 123 to login
@@ -17,7 +18,25 @@ Flight::route('GET /final/login', function(){
     * Sample output is given in figure 7
     * This endpoint should return output in JSON format
     */
+    $login = Flight::request()->data->getData();
+    $user = Flight::FinalDao()->login($login['email']);
+    if(count($user) > 0){
+        $user = $user[0];
+    }
+    if (isset($user['id'])){
+      if($user['password'] == md5($login['password'])){
+        unset($user['password']);
+       
+        $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
+        Flight::json(['token' => $jwt]);
+      }else{
+        Flight::json(["message" => "Wrong password"], 404);
+      }
+    }else{
+      Flight::json(["message" => "User doesn't exist"], 404);
+  }
 });
+
 
 Flight::route('POST /final/investor', function(){
     /** TODO
@@ -42,6 +61,8 @@ Flight::route('GET /final/share_classes', function(){
     * This endpoint is used to list all share classes from share_classes table
     * This endpoint should return output in JSON format
     */
+    Flight::json(Flight::finalService()->share_class());
+   
 });
 
 Flight::route('GET /final/share_class_categories', function(){
@@ -49,5 +70,6 @@ Flight::route('GET /final/share_class_categories', function(){
     * This endpoint is used to list all share class categories from share_class_categories table
     * This endpoint should return output in JSON format
     */
+    Flight::json(Flight::finalService()->share_class_categories());
 });
 ?>

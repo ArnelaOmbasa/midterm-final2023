@@ -11,6 +11,7 @@ class FinalDao extends BaseDao {
     * Implement DAO method used login user
     */
     public function login(){
+        return $this->query("SELECT * FROM users WHERE email = :email", ['email' => $email]);
 
     }
 
@@ -25,6 +26,9 @@ class FinalDao extends BaseDao {
     * Implement DAO method to return list of all share classes from share_classes table
     */
     public function share_classes(){
+        $stmt = $this->conn->prepare("SELECT * FROM share_classes" );
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     }
 
@@ -32,6 +36,9 @@ class FinalDao extends BaseDao {
     * Implement DAO method to return list of all share class categories from share_class_categories table
     */
     public function share_class_categories(){
+        $stmt = $this->conn->prepare("SELECT * FROM share_classes_categories" );
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     }
 }
