@@ -10,7 +10,11 @@ class MidtermDao extends BaseDao {
     /** TODO
     * Implement DAO method used add new investor to investor table and cap-table
     */
-    public function investor(){
+    public function investor($first_name, $last_name, $email,$company){
+        $sql = "INSERT INTO invesors (first_name, last_name, email,company)
+        VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$first_name, $last_name, $email,$company]);
 
 
     }
@@ -44,7 +48,7 @@ class MidtermDao extends BaseDao {
     /** TODO
     * Implement DAO method to return list of investors according to instruction in MidtermRoutes.php
     */
-    
+
     public function investors($id){
         $query = "select sc.description, sc.equity_main_currency, sc.price, sc.authorized_assets, i.first_name, i.last_name, i.email, i.company, sum(ct.diluted_shares) as total_diluted_shares
         from investors i

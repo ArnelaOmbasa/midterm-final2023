@@ -20,8 +20,8 @@ class MidtermService {
     /** TODO
     * Implement service method to validate email format and check if email exists
     */
-    public function investor_email($email){
-        return $this->dao->investor_email();
+    public function investor_email(){
+        return $this->dao->investor_email($email);
 
     }
 
