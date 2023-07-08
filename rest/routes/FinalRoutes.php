@@ -19,22 +19,23 @@ Flight::route('POST /final/login', function(){
     * This endpoint should return output in JSON format
     */
     $login = Flight::request()->data->getData();
-    $user = Flight::FinalDao()->login($login['email']);
-    if(count($user) > 0){
+    $user = Flight::finalService()->login($login['email']);
+
+    if (count($user) > 0) {
         $user = $user[0];
     }
-    if (isset($user['id'])){
-      if($user['password'] == md5($login['password'])){
-        unset($user['password']);
-       
-        $jwt = JWT::encode($user, Config::JWT_SECRET(), 'HS256');
-        Flight::json(['token' => $jwt]);
-      }else{
-        Flight::json(["message" => "Wrong password"], 404);
-      }
-    }else{
-      Flight::json(["message" => "User doesn't exist"], 404);
-  }
+
+    if (isset($user['id'])) {
+        if ($user['password'] == $login['password']) {
+            unset($user['password']);
+            $jwt = JWT::encode($user, 'ABC123', 'HS256');
+            Flight::json(["message" => "Login successful", "jwt" => $jwt], 200);
+        } else {
+            Flight::json(["message" => "Wrong password"], 404);
+        }
+    } else {
+        Flight::json(["message" => "User doesn't exist"], 404);
+    }
 });
 
 
@@ -53,7 +54,19 @@ Flight::route('POST /final/investor', function(){
     * This endpoint should return output in JSON format
     * Sample output is given in figure 2 (message should be updated according to the result)
     */
+    $data = Flight::request()->data->getData();
+
+    Flight::json(Flight::midtermService()->investor(
+        $data['first_name'], 
+        $data['last_name'], 
+        $data['email'], 
+        $data['company'], 
+        $data['share_class_id'], 
+        $data['share_class_category_id'], 
+        $data['diluted_shares']
+    ));
 });
+
 
 
 Flight::route('GET /final/share_classes', function(){
@@ -61,7 +74,7 @@ Flight::route('GET /final/share_classes', function(){
     * This endpoint is used to list all share classes from share_classes table
     * This endpoint should return output in JSON format
     */
-    Flight::json(Flight::finalService()->share_class());
+    Flight::json(Flight::finalService()->share_classes());
    
 });
 

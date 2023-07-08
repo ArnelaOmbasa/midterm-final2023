@@ -50,5 +50,48 @@
      * If user is not logged in (token does not exists or is not valid) implement AJAX call to rest/final/login
      * when login button is clicked
      */
+
+     var UserService = {
+      init: function () {
+        var token = localStorage.getItem('token');
+        
+      if(token){
+        window.location.replace = 'index.html';
+      }
+
+      $('#login-form').submit(function(event) {
+    event.preventDefault(); // Add this to prevent the form from being submitted by default
+
+    var email = $('input[name=email]').val();
+    var password = $('input[name=password]').val();
+
+    UserService.login({email: email, password: password});
+});
+
+      },
+      login: function (data) {
+        $.ajax({
+    type: "POST",
+    url: 'rest/final/login',
+    data: JSON.stringify(data),
+    contentType: 'application/json',
+    success: function(response) {
+        window.location.replace('index.html');
+    },
+    error: function(request, status, error) {
+        console.log("Error: " + error);
+        console.log("Status: " + status);
+        console.dir(request);
+    }
+});
+
+      },
+      logout: function () {
+        localStorage.clear();
+        window.location.replace('login.html');
+      }
+     }
+
+     UserService.init();
   </script>
 </html>
