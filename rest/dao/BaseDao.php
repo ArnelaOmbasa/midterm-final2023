@@ -2,7 +2,7 @@
 
 class BaseDao {
 
-    private $conn;
+    public $conn;
 
     /**
     * constructor of dao class
@@ -13,11 +13,16 @@ class BaseDao {
         /** TODO
         * List parameters such as servername, username, password, schema. Make sure to use appropriate port
         */
-      $username = 'doadmin';
+     /* $username = 'doadmin';
   $password = 'AVNS_z6PG_c6BSn-5dB0CG5S';
   $host = 'db-mysql-nyc1-13993-do-user-3246313-0.b.db.ondigitalocean.com';
 $port = '25060';
-$schema = 'final-midterm2-2023';
+$schema = 'final-midterm2-2023';*/
+$username = 'root';
+$password = '';
+$host = 'localhost';
+$port = '3306';
+$schema = 'mifin';
 
 
 
@@ -32,7 +37,7 @@ $schema = 'final-midterm2-2023';
         * Create new connection
         * Use $options array as last parameter to new PDO call after the password
         */
-  $this->conn = new PDO("mysql:host=$host;port=$port;dbname=$schema", $username, $password,$options);
+      $this->conn = new PDO("mysql:host=$host;port=$port;dbname=$schema", $username, $password/*,$options*/);
         // set the PDO error mode to exception
           $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
           echo "Connected successfully";

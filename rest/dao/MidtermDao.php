@@ -7,93 +7,89 @@ class MidtermDao extends BaseDao {
         parent::__construct();
     }
 
+    public function check_email_exists($email){
+        $query="SELECT * FROM investors WHERE email=:email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function get_total_shares($share_class_id){
+        $query="SELECT SUM(diluted_shares) as total_shares FROM cap_table WHERE share_class_id= :share_class_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':share_class_id', $share_class_id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function get_authorized_assets($share_class_id){
+        $query = "SELECT authorized_assets FROM share_classes WHERE id = :share_class_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':share_class_id', $share_class_id);
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
     /** TODO
     * Implement DAO method used add new investor to investor table and cap-table
     */
-    public function investor($first_name, $last_name, $email,$company){
-        $sql = "INSERT INTO invesors (first_name, last_name, email,company)
-        VALUES (?, ?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$first_name, $last_name, $email,$company]);
+    public function investor($first_name, $last_name, $email, $company, $share_class_id, $share_class_category_id, $diluted_shares){
+        $query = "INSERT INTO investors (first_name, last_name, email, company) VALUES (:first_name, :last_name, :email, :company)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':first_name', $first_name);
+        $stmt->bindParam(':last_name', $last_name);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':company', $company);
+        $stmt->execute();
 
+        $investor_id = $this->conn->lastInsertId();
 
+        $query = "INSERT INTO cap_table (share_class_id, share_class_category_id, investor_id, diluted_shares) VALUES (:share_class_id, :share_class_category_id, :investor_id, :diluted_shares)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':share_class_id', $share_class_id);
+        $stmt->bindParam(':share_class_category_id', $share_class_category_id);
+        $stmt->bindParam(':investor_id', $investor_id);
+        $stmt->bindParam(':diluted_shares', $diluted_shares);
+        $stmt->execute();
+
+        return $investor_id;
     }
+    
+
+
+    
 
     /** TODO
     * Implement DAO method to validate email format and check if email exists
     */
    
-        public function investor_email($email){
-            {
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                   echo 'Invalid format';
-                } else {
-                    $query = "select * from investors where email = :email";
-                    $stmt = $this->conn->prepare($query);
-                    $stmt->execute(['email' => $email]);
-                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($result) {
-                        return 'true';
-                    } else {
-                        return 'null';
-                    }
-                }
-            }
-       
-    
-        
-
+    public function investor_email($email){
+        $query= "SELECT * FROM investors WHERE email=:email";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute(['email' => $email]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result;
     }
+    
 
     /** TODO
     * Implement DAO method to return list of investors according to instruction in MidtermRoutes.php
     */
 
-    public function investors($id){
-        $query = "select sc.description, sc.equity_main_currency, sc.price, sc.authorized_assets, i.first_name, i.last_name, i.email, i.company, sum(ct.diluted_shares) as total_diluted_shares
+    public function investors($share_class_id){
+        $query = "select sc.description, sc.equity_main_currency, sc.price, sc.authorized_assets, i.first_name, i.last_name, i.email, i.company, 
+        sum(ct.diluted_shares) as total_diluted_shares
         from investors i
         join cap_table ct on i.id = ct.investor_id
         join share_classes sc on ct.share_class_id = sc.id
         where sc.id = :id
         group by i.id;";
+
         $stmt = $this->conn->prepare($query);
-        $stmt->execute(['id' => $id]);
+        $stmt->execute(['id' => $share_class_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    public function addInvestor($investorData){
-        $sql = "INSERT INTO investors (first_name, last_name, email, company) VALUES (?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$investorData['first_name'], $investorData['last_name'], $investorData['email'], $investorData['company']]);
-         return $this->conn->lastInsertId();
-    }
-    
-
-    public function addToCapTable($capTableData, $investorId){
-        $sql = "INSERT INTO cap_table (share_class_id, share_class_category_id, investor_id, diluted_shares) VALUES (?, ?, ?, ?)";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$capTableData['share_class_id'], $capTableData['share_class_category_id'], $investorId, $capTableData['diluted_shares']]);
-    }
-
-    public function validateEmail($email){
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return false;
-        }
-        
-        $sql = "SELECT * FROM investors WHERE email = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$email]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function getInvestors($share_class_id){
-        $sql = "SELECT i.*, c.description, c.equity_main_currency, c.price, c.authorized_assets FROM cap_table c
-        INNER JOIN investors i ON c.investor_id = i.id WHERE c.share_class_id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$share_class_id]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     
 
 }
